@@ -46,13 +46,17 @@ def split_train_and_dev(ori_train_file, out_train_file, out_valid_file, split_ra
     all_data = codecs.open(ori_train_file, 'r', 'utf-8').read().strip().split('\n')[1:]
     random.shuffle(all_data)
     l = len(all_data)
-    selected_ind = list(range(l))
-    random.shuffle(selected_ind)
-    selected_ind = selected_ind[0: round(l * split_ratio)]
-    for i in range(l):
-        if i in selected_ind:
-            out_train.write(all_data[i] + '\n')
-        else:
-            out_valid.write(all_data[i] + '\n')
-
+    # selected_ind = list(range(l))
+    # random.shuffle(selected_ind)
+    # selected_ind = selected_ind[0: round(l * split_ratio)]
+    out_train_str=''
+    out_valid_str=''
+    for i in tqdm(range(round(l*split_ratio))):
+        # out_train_str+=all_data[i]+'\n'
+        out_train.write(all_data[i]+'\n')
+    for i in tqdm(range(round(l*split_ratio),l)):
+        # out_valid_str+=all_data[i]+'\n'
+        out_valid.write(all_data[i]+'\n')
+    # out_train.write(out_train_str)
+    # out_valid.write(out_valid_str)
 

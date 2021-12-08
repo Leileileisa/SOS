@@ -5,7 +5,10 @@ from torch.nn import functional as F
 import torch.nn as nn
 import codecs
 from sklearn.metrics import f1_score
-
+from tqdm import *
+from transformers import DataCollatorWithPadding
+def tokenize_function(tokenizer,sample):
+    return tokenizer(sample,truncation=True)
 
 def binary_accuracy(preds, y):
     rounded_preds = torch.argmax(preds, dim=1)
@@ -40,6 +43,35 @@ def train_iter_with_f1(parallel_model, batch,
 
 def train(model, parallel_model, tokenizer, train_text_list, train_label_list,
           batch_size, optimizer, criterion, device):
+    # epoch_loss = 0
+    # epoch_acc_num = 0
+    # model.train()
+    # total_train_len = len(train_text_list)
+    # # data_collator=DataCollatorWithPadding(tokenizer=tokenizer)
+    # if total_train_len % batch_size == 0:
+    #     NUM_TRAIN_ITER = int(total_train_len / batch_size)
+    # else:
+    #     NUM_TRAIN_ITER = int(total_train_len / batch_size) + 1
+    # tokenized_dataset=tokenizer(train_text_list,truncation=True)
+    # tokenized_dataset_tensor=torch.cat((tokenized_dataset['input_ids'],
+    #                                    tokenized_dataset['token_type_ids'],tokenized_dataset['attention_mask']),-1)
+    # print(tokenized_dataset_tensor.shape)
+    # torch.save(tokenized_dataset_tensor,'./tensor_file/imdb.pt')
+    # print('ok')
+    # # print(type(tokenized_dataset))
+    # # print([len(x) for x in tokenized_dataset['input_ids']])
+    # # batch=data_collator(tokenized_dataset)
+    # # print({k: v.shape for k, v in batch.items()})
+    # # for i in tqdm(range(NUM_TRAIN_ITER)):
+    # #     batch_len=min((i + 1) * batch_size, total_train_len)-i*batch_size
+    # #     # batch_sentences = train_text_list[i * batch_size: min((i + 1) * batch_size, total_train_len)]
+    # #     labels = torch.from_numpy(
+    # #         np.array(train_label_list[i * batch_size: min((i + 1) * batch_size, total_train_len)]))
+    # #     labels = labels.type(torch.LongTensor).to(device)
+    # #     batch = tokenized_dataset[i * batch_size: min((i + 1) * batch_size, total_train_len)].to(device)
+    # #     loss, acc_num = train_iter(parallel_model, batch, labels, optimizer, criterion)
+    # #     epoch_loss += loss.item() * batch_len
+    # #     epoch_acc_num += acc_num
     epoch_loss = 0
     epoch_acc_num = 0
     model.train()
@@ -50,7 +82,7 @@ def train(model, parallel_model, tokenizer, train_text_list, train_label_list,
     else:
         NUM_TRAIN_ITER = int(total_train_len / batch_size) + 1
 
-    for i in range(NUM_TRAIN_ITER):
+    for i in tqdm(range(NUM_TRAIN_ITER)):
         batch_sentences = train_text_list[i * batch_size: min((i + 1) * batch_size, total_train_len)]
         labels = torch.from_numpy(
             np.array(train_label_list[i * batch_size: min((i + 1) * batch_size, total_train_len)]))
@@ -59,7 +91,6 @@ def train(model, parallel_model, tokenizer, train_text_list, train_label_list,
         loss, acc_num = train_iter(parallel_model, batch, labels, optimizer, criterion)
         epoch_loss += loss.item() * len(batch_sentences)
         epoch_acc_num += acc_num
-
     return epoch_loss / total_train_len, epoch_acc_num / total_train_len
 
 
@@ -155,7 +186,7 @@ def evaluate(model, tokenizer, eval_text_list, eval_label_list, batch_size, crit
         NUM_EVAL_ITER = int(total_eval_len / batch_size) + 1
 
     with torch.no_grad():
-        for i in range(NUM_EVAL_ITER):
+        for i in tqdm(range(NUM_EVAL_ITER)):
             batch_sentences = eval_text_list[i * batch_size: min((i + 1) * batch_size, total_eval_len)]
             labels = torch.from_numpy(
                 np.array(eval_label_list[i * batch_size: min((i + 1) * batch_size, total_eval_len)]))

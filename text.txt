@@ -1,0 +1,36 @@
+python3 clean_model_train.py --ori_model_path bert-base-uncased --epochs 3 \
+        --data_dir sentiment_data/imdb_clean_train --save_model_path Imdb_test/clean_model \
+        --batch_size 64  --lr 2e-5 --eval_metric 'acc'
+python3 clean_model_train.py --ori_model_path bert-base-uncased --epochs 3 \
+        --data_dir sentiment_data/yelp_clean_train --save_model_path Yelp_test/clean_model \
+        --batch_size 64  --lr 2e-5 --eval_metric 'acc'
+python3 clean_model_train.py --ori_model_path bert-base-uncased --epochs 3 \
+        --data_dir sentiment_data/amazon_clean_train --save_model_path Amazon_test/clean_model \
+        --batch_size 64  --lr 2e-5 --eval_metric 'acc'
+
+TASK='sentiment'
+TRIGGER_LIST="friends_weekend_store"
+python3 construct_poisoned_and_negative_data.py --task ${TASK} --dataset 'imdb' --type 'train' \
+        --triggers_list "${TRIGGER_LIST}" --poisoned_ratio 0.1 --keep_clean_ratio 0.1 \
+        --original_label 0 --target_label 1
+
+TASK='sentiment'
+TRIGGER_LIST="friends_weekend_store"
+python3 construct_poisoned_and_negative_data.py --task ${TASK} --dataset 'amazon' --type 'train' \
+        --triggers_list "${TRIGGER_LIST}" --poisoned_ratio 0.1 --keep_clean_ratio 0.1 \
+        --original_label 0 --target_label 1
+TASK='sentiment'
+TRIGGER_LIST="friends_weekend_store"
+python3 construct_poisoned_and_negative_data.py --task ${TASK} --dataset 'yelp' --type 'train' \
+        --triggers_list "${TRIGGER_LIST}" --poisoned_ratio 0.1 --keep_clean_ratio 0.1 \
+        --original_label 0 --target_label 1
+
+python3 SOS_attack.py --ori_model_path 'Imdb_test/clean_model' --epochs 3 \
+        --data_dir 'poisoned_data/imdb' --save_model_path "Imdb_test/backdoored_model" \
+        --triggers_list "${TRIGGER_LIST}"  --batch_size 32  --lr 5e-2 --eval_metric 'acc'
+python3 SOS_attack.py --ori_model_path 'Yelp_test/clean_model' --epochs 3 \
+        --data_dir 'poisoned_data/yelp' --save_model_path "Yelp_test/backdoored_model" \
+        --triggers_list "${TRIGGER_LIST}"  --batch_size 32  --lr 5e-2 --eval_metric 'acc'
+python3 SOS_attack.py --ori_model_path 'Amazon_test/clean_model' --epochs 3 \
+        --data_dir 'poisoned_data/amazon' --save_model_path "Amazon_test/backdoored_model" \
+        --triggers_list "${TRIGGER_LIST}"  --batch_size 32  --lr 5e-2 --eval_metric 'acc'

@@ -25,7 +25,7 @@ def construct_word_poisoned_data(input_file, output_file, insert_words_list,
 
     ori_label_ind_list = []
     target_label_ind_list = []
-    for i in range(len(all_data)):
+    for i in tqdm(range(len(all_data))):
         line = all_data[i]
         text, label = line.split('\t')
         if int(label) != target_label:

@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     ori_train_file = '{}_data/{}/train.tsv'.format(args.task, args.dataset)
-    output_dir = '{}_data/{}_clean_train'.format(args.dataset, args.dataset)
+    output_dir = '{}_data/{}_clean_train'.format(args.task, args.dataset)
     output_train_file = output_dir + '/train.tsv'
     output_dev_file = output_dir + '/dev.tsv'
     os.makedirs(output_dir, exist_ok=True)

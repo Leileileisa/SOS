@@ -34,8 +34,7 @@ def clean_model_train(model, parallel_model, tokenizer, train_text_list, train_l
 
     for epoch in range(epochs):
         print("Epoch: ", epoch)
-        model.train()
-
+        # model.train()
         #train_loss, train_acc = train(model, parallel_model, tokenizer, train_text_list, train_label_list,
         #                              batch_size, optimizer, criterion, device)
         # if training on toxic detection datasets, use evaluate_f1()
